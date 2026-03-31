@@ -1,0 +1,60 @@
+version: 3
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+  registry_data:
+  gitlab_default_runner:
+  gitlab_runner_init:
+
+services:
+  gitlab_ce: # should be the same as $GITLAB_HOST
+    image: lglussen/gitlab-ce:latest
+    build:
+      dockerfile: Containerfile.gitlab
+    container_name: gitlab_ce
+    restart: unless-stopped
+    hostname: $GITLAB_HOST
+    environment:
+      GITLAB_PORT: $GITLAB_PORT
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://$GITLAB_HOST:$GITLAB_PORT'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+        nginx['enable'] = true
+        gitlab_rails['registry_enabled'] = true
+        registry_external_url 'http://$GITLAB_HOST:5050'
+    ports:
+      - "${GITLAB_PORT}:8929"
+      - '2424:22'
+      - '5050:5050'
+    volumes:
+      - 'gitlab_config:/etc/gitlab'
+      - 'gitlab_logs:/var/log/gitlab'
+      - 'gitlab_data:/var/opt/gitlab'
+      - 'gitlab_runner_init:/var/opt/gitlab_init'
+      - 'registry_data:/var/opt/gitlab/gitlab-rails/shared/registry'
+    shm_size: '256m'
+    healthcheck:
+      test: ['CMD', 'curl', '-s', "localhost:8929/-/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 600s
+  gitlab_runner:
+    image: lglussen/gitlab-runner:fedora
+    build:
+      dockerfile: Containerfile.runner
+    container_name: gitlab_runner
+    depends_on:
+      gitlab_ce:
+        condition: service_healthy
+    volumes:
+      - gitlab_default_runner:/etc/gitlab-runner
+      - gitlab_runner_init:/var/opt/gitlab_init
+    restart: always
+    environment:
+      EXECUTOR: shell
+      RUNNER_NAME: fedora-container
+      GITLAB_HOST: "${GITLAB_HOST}"
+      GITLAB_PORT: $GITLAB_PORT
+

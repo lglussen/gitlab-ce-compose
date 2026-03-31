@@ -1,0 +1,5 @@
+FROM docker.io/gitlab/gitlab-ce:18.10.1-ce.0
+
+COPY init-gitlab-wrapper.sh /assets/init-gitlab-wrapper
+
+CMD /assets/init-gitlab-wrapper

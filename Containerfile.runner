@@ -1,0 +1,7 @@
+FROM registry.fedoraproject.org/fedora:latest
+COPY install.sh /tmp/install.sh
+RUN /tmp/install.sh
+RUN dnf install gitlab-runner jq -y
+COPY runner-cmd.sh /usr/bin/runner-cmd
+CMD /usr/bin/runner-cmd
+RUN dnf install -y yq
