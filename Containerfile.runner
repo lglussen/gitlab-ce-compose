@@ -1,5 +1,5 @@
 FROM registry.fedoraproject.org/fedora:latest
-COPY install.sh /tmp/install.sh
+ADD --chmod=0700 --checksum=sha256:4b3412bd3190168426e0653091cd6d62e4cd507fba53a77a553f34fc4daa8e69 https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh /tmp/install.sh
 RUN /tmp/install.sh
 RUN dnf install gitlab-runner jq -y
 COPY runner-cmd.sh /usr/bin/runner-cmd
