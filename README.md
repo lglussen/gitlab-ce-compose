@@ -12,9 +12,11 @@ wait until both the `gitlab_ce` and `gitlab_runner` containers are up
 podman exec -it gitlab_ce cat /etc/gitlab/initial_root_password | grep Password
 ```
 
-Assuming you have configured `gitlab_ce` to point to the maching running podman, navigate to http://gitlab_ce:8929 and log-in as root
+Navigate to `http://localhost:8929` and log-in as root.
 
-## Warning on using `/etc/hosts` on the host machine
+## Warning on using `/etc/hosts`
+It can be desirable to use the same "dns" entry configured in gitlab rather than `localhost` to avoid warnings and potential issues.
+
 If you modify the `/etc/hosts` file to map `gitlab_ce` to `127.0.0.1` on the machine running podman, this can mess up the internal container DNS for short name resolution.
 This is because podman will copy the the `/etc/hosts` file into the containers by default.
 If you are trying to access gitlab from the same machine running the containers, consider modifying the `$HOME/.config/containers/containers.conf` file
