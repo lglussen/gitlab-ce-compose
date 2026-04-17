@@ -6,7 +6,11 @@ This project sets up Gitlab CE and automaticaly configures a default runner for 
 podman-compose build
 podman-compose up -d
 ```
-wait until both the `gitlab_ce` and `gitlab_runner` containers are up
+wait until both the `gitlab_ce` and `gitlab_runner` containers are up.
+Please note that this may take 10-15 minutes on the first run.
+It may look like the process is hanging and this may be confusing give that the background `-d` was given:
+but this is because the second container `gitlab_runner` is not launched until the `gitlab_ce` container is passing its healthcheck.
+Compose will background the processes and exit as soon as the final container is started.
 
 ```shell
 podman exec -it gitlab_ce cat /etc/gitlab/initial_root_password | grep Password
